@@ -1,0 +1,645 @@
+<!-- 
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sireesha Balivada — Mechanical Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy: #0B1F2E;
+  --navy-deep: #081722;
+  --surface: #142B3D;
+  --line: #2A4A60;
+  --paper: #E8ECEF;
+  --paper-dim: #A9B9C4;
+  --blue: #3D8BFF;
+  --amber: #F2A94D;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Space Grotesk', sans-serif;
+  --body: 'Inter', sans-serif;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+
+body{
+  background: var(--navy);
+  color: var(--paper);
+  font-family: var(--body);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Blueprint grid backdrop */
+.blueprint-grid{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(61,139,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,139,255,0.06) 1px, transparent 1px),
+    linear-gradient(rgba(61,139,255,0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,139,255,0.13) 1px, transparent 1px);
+  background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+}
+
+.crosshair{
+  position: fixed;
+  width: 22px; height: 22px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.35;
+}
+.crosshair::before, .crosshair::after{
+  content:'';
+  position:absolute;
+  background: var(--blue);
+}
+.crosshair::before{ width:100%; height:1px; top:50%; left:0; }
+.crosshair::after{ width:1px; height:100%; left:50%; top:0; }
+.ch-tl{ top:18px; left:18px; }
+.ch-tr{ top:18px; right:18px; }
+.ch-bl{ bottom:18px; left:18px; }
+.ch-br{ bottom:18px; right:18px; }
+
+/* Scroll progress bar (JS-driven) */
+.scroll-progress{
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--blue);
+  z-index: 100;
+  transition: width 0.1s linear;
+}
+
+.wrap{ position:relative; z-index:2; max-width: 980px; margin: 0 auto; padding: 0 28px; }
+
+/* ===== NAV ===== */
+nav{
+  position: sticky; top:0; z-index: 50;
+  backdrop-filter: blur(10px);
+  background: rgba(11,31,46,0.85);
+  border-bottom: 1px solid var(--line);
+}
+.nav-inner{
+  max-width: 980px; margin:0 auto; padding: 16px 28px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.nav-mark{
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em;
+  color: var(--amber);
+}
+.nav-links{ display:flex; gap: 28px; list-style:none; }
+.nav-links a{
+  color: var(--paper-dim); text-decoration:none;
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  position: relative;
+  padding-bottom: 2px;
+}
+.nav-links a:hover, .nav-links a:focus-visible{ color: var(--blue); }
+.nav-links a.active{ color: var(--amber); }
+.nav-links a.active::after{
+  content:'';
+  position:absolute; left:0; bottom:-4px;
+  width:100%; height:1px; background: var(--amber);
+}
+
+/* ===== HERO / TITLE BLOCK ===== */
+header{
+  position: relative;
+  padding: 100px 0 70px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow{
+  font-family: var(--mono); font-size: 12.5px; color: var(--blue);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 18px; display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{
+  content:''; width:28px; height:1px; background: var(--blue);
+}
+h1{
+  font-family: var(--display); font-weight:700;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+.hero-role{
+  font-family: var(--body); font-weight: 500;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  color: var(--paper-dim);
+  max-width: 580px;
+  margin-bottom: 36px;
+}
+.hero-role strong{ color: var(--paper); font-weight:600; }
+
+/* Title block — engineering drawing corner stamp */
+.title-block{
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 8px;
+}
+.tb-cell{
+  padding: 14px 18px;
+  border-right: 1px solid var(--line);
+}
+.tb-cell:last-child{ border-right:none; }
+.tb-label{
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  color: var(--paper-dim); text-transform: uppercase; margin-bottom: 6px;
+}
+.tb-value{
+  font-family: var(--mono); font-size: 13px; color: var(--paper);
+}
+.tb-value a{ color: var(--blue); text-decoration:none; }
+.tb-value a:hover{ text-decoration:underline; }
+
+@media (max-width: 720px){
+  .title-block{ grid-template-columns: repeat(2, 1fr); }
+  .tb-cell:nth-child(2){ border-right:none; }
+}
+
+/* ===== SECTION SCAFFOLD ===== */
+section{ padding: 70px 0; border-bottom: 1px solid var(--line); position:relative; }
+section:last-of-type{ border-bottom:none; }
+
+.sec-head{
+  display:flex; align-items: baseline; gap: 16px;
+  margin-bottom: 40px;
+}
+.sec-num{
+  font-family: var(--mono); font-size: 13px; color: var(--blue);
+}
+.sec-title{
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.01em;
+}
+.sec-rule{
+  flex:1; height:1px; background: var(--line);
+}
+
+/* ===== PROFILE ===== */
+.profile-text{
+  font-size: 1.08rem;
+  color: var(--paper-dim);
+  max-width: 640px;
+}
+.profile-text strong{ color: var(--paper); font-weight:600; }
+
+/* ===== EXPERIENCE ===== */
+.sheet{
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 28px 30px;
+  position: relative;
+}
+.sheet + .sheet{ margin-top: 24px; }
+.sheet-top{
+  display:flex; justify-content: space-between; align-items:flex-start;
+  flex-wrap: wrap; gap: 10px;
+  margin-bottom: 14px;
+}
+.sheet-org{
+  font-family: var(--display); font-weight:600; font-size: 1.2rem;
+}
+.sheet-role{
+  font-family: var(--body); color: var(--paper-dim); font-size: 0.96rem; margin-top: 4px;
+}
+.sheet-date{
+  font-family: var(--mono); font-size: 12px; color: var(--amber);
+  border: 1px solid rgba(242,169,77,0.4);
+  padding: 4px 10px;
+  white-space: nowrap;
+  height: fit-content;
+}
+.sheet ul{ list-style:none; margin-top: 14px; display:flex; flex-direction:column; gap:9px; }
+.sheet li{
+  padding-left: 20px; position: relative;
+  color: var(--paper-dim); font-size: 0.95rem;
+}
+.sheet li::before{
+  content:'—'; position:absolute; left:0; color: var(--blue);
+  font-family: var(--mono);
+}
+
+/* ===== PROJECTS ===== */
+.projects-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 720px){ .projects-grid{ grid-template-columns: 1fr; } }
+
+.proj-card{
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 26px;
+  display:flex; flex-direction:column;
+  position:relative;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+.proj-card:hover{
+  transform: translateY(-4px);
+  border-color: var(--blue);
+}
+.proj-tag{
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 12px;
+}
+.proj-title{
+  font-family: var(--display); font-weight:600; font-size: 1.18rem;
+  margin-bottom: 14px; line-height: 1.3;
+}
+.proj-card ul{ list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:auto; padding-top: 8px; }
+.proj-card li{
+  padding-left: 18px; position: relative;
+  color: var(--paper-dim); font-size: 0.92rem;
+}
+.proj-card li::before{
+  content:'›'; position:absolute; left:0; color: var(--amber);
+}
+.dim-line{
+  position:absolute; top:0; right:0;
+  font-family: var(--mono); font-size: 9.5px; color: var(--line);
+  padding: 8px;
+}
+
+/* ===== SKILLS / GRID ===== */
+.grid-2{
+  display:grid; grid-template-columns: 1.3fr 1fr; gap: 50px;
+}
+@media (max-width: 720px){ .grid-2{ grid-template-columns: 1fr; gap: 36px; } }
+
+.skill-row{
+  display:flex; justify-content: space-between; align-items:center;
+  padding: 13px 0; border-bottom: 1px dashed var(--line);
+  font-family: var(--mono); font-size: 0.92rem;
+}
+.skill-row:first-child{ border-top: 1px dashed var(--line); }
+.skill-index{ color: var(--blue); margin-right: 14px; }
+.skill-name{ flex:1; }
+.skill-bar{
+  width: 90px; height: 4px; background: var(--line); position:relative;
+  overflow: hidden;
+}
+.skill-bar i{
+  position:absolute; left:0; top:0; height:100%; background: var(--amber); display:block;
+  width: 0%;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-block + .side-block{ margin-top: 32px; }
+.side-label{
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+  color: var(--paper-dim); text-transform: uppercase; margin-bottom: 14px;
+}
+.pill{
+  display:inline-block; font-family: var(--mono); font-size: 12.5px;
+  border: 1px solid var(--line); padding: 7px 12px; margin: 0 8px 8px 0;
+  color: var(--paper);
+  transition: border-color 0.2s, color 0.2s;
+}
+.pill:hover{ border-color: var(--blue); color: var(--blue); }
+
+/* ===== EDUCATION ===== */
+.edu-item{
+  display:grid; grid-template-columns: 100px 1fr;
+  gap: 20px; padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.edu-item:last-child{ border-bottom:none; }
+.edu-year{
+  font-family: var(--mono); font-size: 12.5px; color: var(--amber);
+}
+.edu-name{ font-family: var(--display); font-weight:600; font-size: 1.05rem; margin-bottom: 4px;}
+.edu-detail{ color: var(--paper-dim); font-size: 0.92rem; }
+
+/* ===== ACHIEVEMENT BANNER ===== */
+.achievement{
+  border: 1px solid var(--amber);
+  background: linear-gradient(135deg, rgba(242,169,77,0.08), transparent);
+  padding: 26px 30px;
+  display:flex; align-items:center; gap: 20px;
+}
+.achievement-icon{
+  font-family: var(--mono); font-size: 11px; color: var(--amber);
+  border: 1px solid var(--amber); padding: 10px 12px; flex-shrink:0;
+}
+.achievement-text{ font-family: var(--display); font-weight:600; font-size: 1.05rem; }
+.achievement-sub{ font-family: var(--mono); font-size: 12px; color: var(--paper-dim); margin-top: 4px; }
+
+/* ===== FOOTER / CONTACT ===== */
+footer{ padding: 60px 0 50px; }
+.contact-row{
+  display:flex; flex-wrap:wrap; gap: 18px; margin-top: 28px;
+}
+.contact-item{
+  font-family: var(--mono); font-size: 13px;
+  color: var(--paper); text-decoration:none;
+  border: 1px solid var(--line); padding: 12px 18px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.contact-item:hover, .contact-item:focus-visible{
+  border-color: var(--blue); color: var(--blue);
+}
+.foot-note{
+  margin-top: 50px; font-family: var(--mono); font-size: 11px;
+  color: var(--paper-dim); display:flex; justify-content:space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+
+/* ===== JS SCROLL-REVEAL ===== */
+.reveal{
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== BACK-TO-TOP BUTTON (JS-driven) ===== */
+.to-top{
+  position: fixed;
+  bottom: 28px; right: 28px;
+  width: 44px; height: 44px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.2s ease;
+}
+.to-top.visible{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.to-top:hover{ border-color: var(--blue); }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  .reveal{ opacity:1; transform:none; transition:none; }
+  .skill-bar i{ transition:none; }
+}
+
+::selection{ background: var(--blue); color: var(--navy-deep); }
+
+a:focus-visible, button:focus-visible{
+  outline: 2px solid var(--blue); outline-offset: 3px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="scroll-progress"></div>
+<div class="blueprint-grid"></div>
+<div class="crosshair ch-tl"></div>
+<div class="crosshair ch-tr"></div>
+<div class="crosshair ch-bl"></div>
+<div class="crosshair ch-br"></div>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-mark">SB / 001</span>
+    <ul class="nav-links">
+      <li><a href="#profile">Profile</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Mechanical Engineering — Drawing No. SB-2025</p>
+    <h1>Sireesha<br>Balivada</h1>
+    <p class="hero-role">
+      <strong>Mechanical engineering graduate</strong> with hands-on experience in quality assurance,
+      CAD design, and simulation-driven engineering — built on a foundation of analytical
+      problem-solving and process improvement.
+    </p>
+
+    <div class="title-block">
+      <div class="tb-cell">
+        <div class="tb-label">Location</div>
+        <div class="tb-value">Patrunivalasa, Srikakulam</div>
+      </div>
+      <div class="tb-cell">
+        <div class="tb-label">Phone</div>
+        <div class="tb-value">93468 08354</div>
+      </div>
+      <div class="tb-cell">
+        <div class="tb-label">Email</div>
+        <div class="tb-value"><a href="mailto:sirishapatnaik12345@gmail.com">sirishapatnaik12345@gmail.com</a></div>
+      </div>
+      <div class="tb-cell">
+        <div class="tb-label">Github</div>
+        <div class="tb-value"><a href="#" target="_blank" rel="noopener">View profile →</a></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="profile">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Profile</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <p class="profile-text">
+      A <strong>Mechanical Engineering graduate</strong> from GMR Institute of Technology with
+      practical exposure to quality assurance in manufacturing environments, computer-aided
+      design tools, and engineering simulation. Comfortable moving between the shop floor and
+      the CAD workstation — inspecting components for compliance, troubleshooting defects, and
+      designing functional systems from first principles. Driven by strong analytical thinking
+      and a continuous-improvement mindset.
+    </p>
+  </section>
+
+  <section id="experience">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Experience</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="sheet">
+      <div class="sheet-top">
+        <div>
+          <div class="sheet-org">AMBER Enterprises</div>
+          <div class="sheet-role">An Industrial Insight into Quality Assurance Practices in the Moulding Department · Sricity</div>
+        </div>
+        <div class="sheet-date">DEC 2024 — APR 2025</div>
+      </div>
+      <ul>
+        <li>Inspected moulded components for quality compliance against engineering specifications.</li>
+        <li>Identified production defects and supported root-cause corrective actions.</li>
+        <li>Assisted in implementing and refining quality control procedures on the moulding line.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Projects</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="projects-grid">
+      <div class="proj-card">
+        <span class="dim-line">FIG. A</span>
+        <div class="proj-tag">Thermal &amp; Fluid Simulation</div>
+        <div class="proj-title">Double-Pipe Heat Exchanger Analysis</div>
+        <ul>
+          <li>Simulated fluid flow and heat transfer through a double-pipe configuration.</li>
+          <li>Evaluated thermal performance and pressure drop characteristics.</li>
+          <li>Improved design efficiency through simulation-based iteration.</li>
+        </ul>
+      </div>
+
+      <div class="proj-card">
+        <span class="dim-line">FIG. B</span>
+        <div class="proj-tag">Design &amp; Fabrication</div>
+        <div class="proj-title">Hydraulic Robotic Arm</div>
+        <ul>
+          <li>Designed and fabricated a hydraulic-actuated robotic arm.</li>
+          <li>Implemented hydraulic systems for controlled movement and lifting.</li>
+          <li>Demonstrated use cases in material handling and precision tasks.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Skills &amp; Interests</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="skill-row">
+          <span class="skill-index">01</span>
+          <span class="skill-name">SolidWorks</span>
+          <div class="skill-bar"><i style="width:90%"></i></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-index">02</span>
+          <span class="skill-name">Python</span>
+          <div class="skill-bar"><i style="width:75%"></i></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-index">03</span>
+          <span class="skill-name">Java</span>
+          <div class="skill-bar"><i style="width:65%"></i></div>
+        </div>
+        <div class="skill-row">
+          <span class="skill-index">04</span>
+          <span class="skill-name">C Language</span>
+          <div class="skill-bar"><i style="width:65%"></i></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="side-block">
+          <div class="side-label">Certifications</div>
+          <span class="pill">Programming in Python</span>
+          <span class="pill">Data Structures</span>
+        </div>
+        <div class="side-block">
+          <div class="side-label">Interests</div>
+          <span class="pill">Listening to Music</span>
+          <span class="pill">Badminton</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Education</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="sheet" style="padding:0 30px;">
+      <div class="edu-item">
+        <div class="edu-year">2021—2025</div>
+        <div>
+          <div class="edu-name">GMR Institute of Technology, Rajam</div>
+          <div class="edu-detail">B.Tech, Mechanical Engineering — CAD software, manufacturing principles, and core mechanical engineering concepts.</div>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-year">2019—2021</div>
+        <div>
+          <div class="edu-name">NRI Junior College, Srikakulam</div>
+          <div class="edu-detail">Intermediate — 80% marks.</div>
+        </div>
+      </div>
+      <div class="edu-item">
+        <div class="edu-year">2018—2019</div>
+        <div>
+          <div class="edu-name">TPMC High School, Srikakulam</div>
+          <div class="edu-detail">Secondary School — 9.8 CGPA.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <div class="achievement">
+      <div class="achievement-icon">AWARD</div>
+      <div>
+        <div class="achievement-text">1st Prize — Cadathon, STEPCONE</div>
+        <div class="achievement-sub">Inter-college CAD design competition</div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="sec-head" style="margin-bottom:8px;">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Contact</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <p class="profile-text">Open to opportunities in quality assurance, CAD design, and mechanical engineering roles.</p>
+    <div class="contact-row">
+      <a class="contact-item" href="mailto:sirishapatnaik12345@gmail.com">✉ sirishapatnaik12345@gmail.com</a>
+      <a class="contact-item" href="tel:9346808354">☎ +91 93468 08354</a>
+      <a class="contact-item" href="#" target="_blank" rel="noopener">⌥ Github</a>
+    </div>
+    <div class="foot-note">
+      <span>SB-2025 / REV.A</
